@@ -2,10 +2,19 @@ use std::io::{stdout, Write, Stdout};
 use crossterm::{execute, terminal, cursor};
 use std::io;
 use std::error::Error;
-use sqlx::{SqliteConnection, Connection};
+use std::str::FromStr;
+use sqlx::{ConnectOptions, sqlite::SqliteConnectOptions};
 
 pub async fn create_database() -> Result<String, Box<dyn Error>> {
-    let conn = SqliteConnection::connect("Cats.db").await?;
+    let mut conn = SqliteConnectOptions::from_str("sqlite://test.db?mode=rwc")?
+        .connect().await?;
+
+    sqlx::query("CREATE TABLE product (
+        id INT PRIMARY KEY,
+        name TEXT NOT NULL,
+        price TEXT NOT NULL
+    )"
+        ).execute(&mut conn).await?;
 
     println!("Database created.");
     Ok("OK".to_string())

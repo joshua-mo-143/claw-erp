@@ -6,7 +6,7 @@ use std::error::Error;
 use crate::utils::{get_input, delete_lines, get_input_price};
 use std::io::{stdout};
 
-pub async fn products_menu(conn: &SqliteConnection) -> Result<(), Box<dyn Error>> {
+pub async fn products_menu() -> Result<(), Box<dyn Error>> {
     println!("-PRODUCTS MENU-");
     println!("Press `h` for help.");
 
@@ -42,7 +42,7 @@ async fn create_product() -> Result<(), Box<dyn Error>> {
     delete_lines(&stdout, 2);
     print!("Product price: {}\r\n", item_price);
 
-    let mut conn = SqliteConnection::connect("Cats.db").await?;
+    let mut conn = SqliteConnection::connect("test.db").await?;
 
      sqlx::query("INSERT INTO product (name, price) VALUES ($1, $2)")
         .bind(item_name)
@@ -56,7 +56,7 @@ async fn create_product() -> Result<(), Box<dyn Error>> {
 
 async fn view_products() -> Result<(), Box<dyn Error>> {
 
-    let mut conn = SqliteConnection::connect("Cats.db").await?;
+    let mut conn = SqliteConnection::connect("test.db").await?;
 
     let meme = sqlx::query("SELECT * FROM product")
         .fetch_all(&mut conn).await?;
@@ -69,7 +69,7 @@ async fn view_products() -> Result<(), Box<dyn Error>> {
             name: row.get("name"),
             price: row.get("price")
         };
-        println!("{}", meme);
+        println!("{:?}", meme);
     }
 
     Ok(())

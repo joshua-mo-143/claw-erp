@@ -15,15 +15,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("Claw ERP v0.1.0");
     println!("If you have any problems, queries or questions, feel free to email me at joshua.mo.876@gmail.com");
 
-    if !std::path::Path::new("Cats.db").exists() {
+    if !std::path::Path::new("Test.db").exists() {
         println!("You don't have a database in use at the moment!");
         create_database().await;
 
     } else {
         println!("Database found.");
     }
-
-    let conn = SqliteConnection::connect("Cats.db").await?;
 
     println!("Database connected.");
 
@@ -39,7 +37,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 println!("Claw ERP v0.1.0 -- created by Joshua Mo")
             },
             "p" => {
-                products_menu(&conn).await?;
+                products_menu().await?;
             }
             "sales" => {
                 sales_menu();
