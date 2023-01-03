@@ -1,5 +1,7 @@
 use std::io;
 
+use crate::utils::invalid_input;
+
 pub fn sales_menu() {
     println!("-SALES MENU-");
 
@@ -12,11 +14,11 @@ pub fn sales_menu() {
 
         match command.trim() {
             "help" => println!("Hello world"),
-            "exit" => {
+            "home" => {
                 println!("-MAIN MENU-");
                 break;
             }
-            _ => continue,
+            _ => {invalid_input(); continue}
 
         }
     }

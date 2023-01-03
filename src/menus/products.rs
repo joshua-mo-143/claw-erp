@@ -1,28 +1,57 @@
-use crossterm::event::{Event, read};
-
+use cli_table::{Table, Cell, print_stdout, Style};
 use sqlx::{SqliteConnection, Connection};
-use sqlx::Row;
 use std::error::Error;
-use crate::utils::{get_input, delete_lines, get_input_price};
+use crate::utils::{get_input, delete_lines, get_input_price, get_data, get_one_row, invalid_input};
 use std::io::{stdout};
 
 pub async fn products_menu() -> Result<(), Box<dyn Error>> {
     println!("-PRODUCTS MENU-");
-    println!("Press `h` for help.");
+    println!("Type `help` for a list of commands you can run, or type `home` to go back to the main menu.");
 
     loop {
-        match read()? {
-            Event::Key(event) => {
-                match event.code { 
-                    crossterm::event::KeyCode::Char('h') => println!("Hello world"),
-                    crossterm::event::KeyCode::Char('c') => create_product().await?,
-                    crossterm::event::KeyCode::Char('v') => view_products().await?,
-                    _ => continue
-            }
+
+        let meme = get_input();
+
+        let mut input = meme.split(' ');
+        
+        let cmd = input.next().unwrap();
+
+        match cmd.trim() {
+            "help" => {
+                println!("`create` -- Create a product.");
+                println!("`view` -- View all products.");
+                println!("`home` -- Go back to the main menu.");
             },
-            _ => continue
-        };
+            "new" => create_product().await?,
+            "view" => {
+                match input.next() {
+                    Some(x) => {
+                        match x.trim().parse::<i32>() {
+                            Ok(num) => {
+                                view_one_product(num).await?;
+                                continue
+                            },
+                            Err(err) => {
+                                println!("Error: {}", err);
+                                continue
+                            }
+                        }
+                    },
+                    _ => {
+                        view_all_products().await?;
+                        continue
+                    }
+                }
+
+            },
+            "home" => {
+                 println!("-HOME MENU-");
+                 break;
+             },
+            _ => {invalid_input(); continue}
+        }
     }
+    Ok(())
 }
 
 async fn create_product() -> Result<(), Box<dyn Error>> {
@@ -50,34 +79,37 @@ async fn create_product() -> Result<(), Box<dyn Error>> {
         .execute(&mut conn)
         .await?;
 
-        println!("meme");
+        println!("Added successfully.");
         Ok(())
 }
 
-async fn view_products() -> Result<(), Box<dyn Error>> {
+async fn view_all_products() -> Result<(), Box<dyn Error>> {
 
-    let mut conn = SqliteConnection::connect("test.db").await?;
+    let mut conn = SqliteConnection::connect("sqlite://test.db").await?;
 
-    let meme = sqlx::query("SELECT * FROM product")
-        .fetch_all(&mut conn).await?;
+    let query = sqlx::query("SELECT * FROM product").fetch_all(&mut conn).await?;
 
-    println!("Loading...");
+    let table_display = get_data(query).table().title(vec!["ID".cell(), "Item Name".cell(), "Item Price".cell()]);
 
-    for row in meme.into_iter() {
-        let meme = Product {
-            id: row.get("id"),
-            name: row.get("name"),
-            price: row.get("price")
-        };
-        println!("{:?}", meme);
-    }
+    println!("{}", table_display.display().unwrap());
 
     Ok(())
 }
 
-#[derive(Debug)]
-struct Product {
-    id: Option<u32>,
-    name: String,
-    price: String,
+async fn view_one_product(id: i32) -> Result<(), Box<dyn Error>> {
+
+    let mut conn = SqliteConnection::connect("sqlite://test.db").await?;
+
+    let query = sqlx::query("SELECT * FROM product WHERE id = $1")
+    .bind(id)
+    .fetch_one(&mut conn).await?;
+
+    let product = get_one_row(query);
+    
+    let table_display = product.data.table().title(product.headers.iter().map(|e| e.cell().bold(true)));
+
+    print_stdout(table_display).unwrap();
+
+    Ok(())
+
 }
