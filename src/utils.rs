@@ -53,25 +53,33 @@ pub fn delete_lines(mut stdout: &io::Stdout, lines: u16) {
     stdout.flush().expect("Had an issue flushing stdout :(");
 }
 
-pub fn get_data(data: Vec<SqliteRow>) -> Vec<Vec<String>> {
+pub fn get_data(data: Vec<SqliteRow>) -> Data {
     let mut product_data = Vec::new();
+    let mut headers = Vec::new();
 
     for row in data.into_iter() {
         let mut record = Vec::new();
 
         let id: i32 = row.get("id");
         let id_string = id.to_string();
-        record.push(mem);
+        record.push(id_string);
+        headers.push("ID".to_string());
         for i in 1..row.len() {
 
             let item = row.get(i);
             record.push(item);
+            headers.push(row.column(i).name().to_string());
         }
 
         product_data.push(record);
     }
 
-    product_data
+    let returned_data = Data {
+        data: product_data,
+        headers: headers
+    };
+
+    returned_data
 }
 
 pub fn get_one_row(data: SqliteRow) -> Data {
@@ -92,7 +100,7 @@ pub fn get_one_row(data: SqliteRow) -> Data {
             let item = data.get(i);
             record.push(item);
         }
-        product_data.push(meme);
+        product_data.push(record);
     
     let returned_data = Data {
         data: product_data,
