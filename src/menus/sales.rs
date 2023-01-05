@@ -9,8 +9,10 @@ pub fn sales_menu() {
         let mut command = String::new();
 
         let stdin = io::stdin();
-        
-        stdin.read_line(&mut command).expect("Had a problem reading your input :(");
+
+        stdin
+            .read_line(&mut command)
+            .expect("Had a problem reading your input :(");
 
         match command.trim() {
             "help" => println!("Hello world"),
@@ -18,8 +20,10 @@ pub fn sales_menu() {
                 println!("-MAIN MENU-");
                 break;
             }
-            _ => {invalid_input(); continue}
-
+            _ => {
+                invalid_input();
+                continue;
+            }
         }
     }
 }

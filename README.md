@@ -19,4 +19,4 @@ Having used business solutions like SAP Business One, I have found ERP business 
 - Crossterm: Deals with terminal utilities like clearing screen and setting of text. Probably expanding on this at some point.
 - cli_table: Makes a CLI table. Currently, this is being used to make the data view not completely horrendous.
 - sqlx: Work with different types of databases without having to pull the individual database's driver
-- Tokio: Enable async functions to work. Essential functionality as 
+- Tokio: Enable async functions to work. Essential functionality since SQLX queries are async.
